@@ -1,4 +1,3 @@
-# IDEA
+# ignore
+node_modules*
 .idea*
-target*
-*.iml

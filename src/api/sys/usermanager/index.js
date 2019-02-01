@@ -1,6 +1,6 @@
 import request from '@/plugin/axios'
 
-export function GetUserList (searchKey,pageNum) {
+export function GetUserList (searchKey, pageNum) {
   return request({
     url: `/user/list?searchKey=${searchKey}&pageNum=${pageNum}`,
     method: 'get'

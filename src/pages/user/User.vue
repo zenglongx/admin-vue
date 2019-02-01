@@ -294,7 +294,7 @@ export default {
     },
     getUserList () {
       this.loading = true
-      GetUserList(this.searchKey,this.pagination.currentPage).then(data => {
+      GetUserList(this.searchKey, this.pagination.currentPage).then(data => {
         this.data = data.list
         this.pagination.total = data.total
         // this.pagination.currentPage = data.pageNum
