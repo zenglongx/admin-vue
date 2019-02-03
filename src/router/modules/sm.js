@@ -8,10 +8,10 @@ import Log from '@/pages/log'
 const meta = { auth: true }
 
 export default {
-  path: '/um',
-  name: 'um',
+  path: '/sm',
+  name: 'sm',
   meta,
-  redirect: { name: 'um-user' },
+  redirect: { name: 'sm-user' },
   component: layoutHeaderAside,
   children: (pre => [
     {
@@ -52,5 +52,5 @@ export default {
         ...meta, title: '日志管理'
       }
     }
-  ])('um-')
+  ])('sm-')
 }

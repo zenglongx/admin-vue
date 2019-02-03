@@ -1,4 +1,4 @@
-import demo from './modules/um'
+import demo from './modules/sm'
 
 import layoutHeaderAside from '@/layout/header-aside'
 

@@ -1,6 +1,10 @@
 // 设置文件
 import setting from '@/setting.js'
 
+function convert (menu) {
+  return { title: menu.name, icon: menu.icon, path: menu.path, ...menu.children.length > 0 ? { children: menu.children.map(convert) } : {} }
+}
+
 export default {
   namespaced: true,
   state: {
@@ -64,6 +68,59 @@ export default {
           defaultValue: setting.menu.asideCollapse,
           user: true
         }, { root: true })
+        // end
+        resolve()
+      })
+    },
+    /**
+     *
+     * @param state
+     * @param dispatch
+     * @param menutree
+     * @returns {Promis}
+     */
+    set ({ state, dispatch }, menutree) {
+      return new Promise(async resolve => {
+        state.aside = menutree === null ? [] : [convert(menutree)]
+        state.header = menutree === null ? [] : [convert(menutree)]
+        //
+        await dispatch('d2admin/db/set', {
+          dbName: 'sys',
+          path: 'user.menu',
+          value: state.aside,
+          user: true
+        }, { root: true })
+        //
+        resolve()
+      })
+    },
+    /**
+     *
+     * @param state
+     * @param dispatch
+     * @returns {Promise<any>}
+     */
+    load ({ state, dispatch, commit }) {
+      return new Promise(async resolve => {
+        // store 赋值
+        state.aside = await dispatch('d2admin/db/get', {
+          dbName: 'sys',
+          path: 'user.menu',
+          defaultValue: {},
+          user: true
+        }, { root: true })
+
+        state.header = await dispatch('d2admin/db/get', {
+          dbName: 'sys',
+          path: 'user.menu',
+          defaultValue: {},
+          user: true
+        }, { root: true })
+
+        // 初始化菜单搜索功能
+        await commit('d2admin/search/init', state.header, { root: true })
+
+        await dispatch('asideCollapseLoad')
         // end
         resolve()
       })

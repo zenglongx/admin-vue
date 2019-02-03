@@ -17,3 +17,10 @@ export function AccountLogin (data) {
     data
   })
 }
+
+export function AccountLogout () {
+  return request({
+    url: '/logout',
+    method: 'post'
+  })
+}

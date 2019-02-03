@@ -1,5 +1,6 @@
 import util from '@/libs/util.js'
-import { AccountLogin } from '@/api/sys/login'
+import { AccountLogin, AccountLogout } from '@/api/sys/login'
+import { GetMenuTree } from '@/api/sys/menumanager'
 
 export default {
   namespaced: true,
@@ -12,7 +13,7 @@ export default {
      * @param {Object} param password {String} 密码
      * @param {Object} param route {Object} 登录成功后定向的路由对象 任何 vue-router 支持的格式
      */
-    login ({ dispatch }, {
+    login ({ commit, dispatch }, {
       vm,
       username,
       password
@@ -31,12 +32,21 @@ export default {
             // 如有必要 token 需要定时更新，默认保存一天
             util.cookies.set('uuid', res.uuid)
             util.cookies.set('token', res.token)
-            // 设置 vuex 用户信息
-            await dispatch('d2admin/user/set', {
-              name: res.name
-            }, { root: true })
-            // 用户登录后从持久化数据加载一系列的设置
-            await dispatch('load')
+
+            // get menu permission
+            await GetMenuTree().then(menutree => {
+              // 设置用户菜单
+              dispatch('d2admin/menu/set', menutree, { root: true })
+
+              // 设置 vuex 用户信息
+              dispatch('d2admin/user/set', {
+                name: res.name
+              }, { root: true })
+
+              // 用户登录后从持久化数据加载一系列的设置
+              dispatch('load')
+            })
+
             // 结束
             resolve()
           })
@@ -60,11 +70,14 @@ export default {
         // 删除cookie
         util.cookies.remove('token')
         util.cookies.remove('uuid')
-        // 清空 vuex 用户信息
-        await dispatch('d2admin/user/set', {}, { root: true })
-        // 跳转路由
-        vm.$router.push({
-          name: 'login'
+        // 服务器登出
+        AccountLogout().then(data => {
+          // 清空 vuex 用户信息
+          dispatch('d2admin/user/set', {}, { root: true })
+          // 跳转路由
+          vm.$router.push({
+            name: 'login'
+          })
         })
       }
       // 判断是否需要确认
@@ -93,6 +106,8 @@ export default {
      */
     load ({ commit, dispatch }) {
       return new Promise(async resolve => {
+        // DB -> strore 加载菜单
+        await dispatch('d2admin/menu/load', null, { root: true })
         // DB -> store 加载用户名
         await dispatch('d2admin/user/load', null, { root: true })
         // DB -> store 加载主题
